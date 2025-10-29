@@ -1,0 +1,377 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="hero-section mb-5">
+  <div class="container-fluid py-5">
+    <div class="row align-items-center">
+      <div class="col-lg-8">
+        <h1 class="display-4 fw-bold text-primary mb-3">
+          <i class="fas fa-seedling me-3"></i>The Greenhouse
+        </h1>
+        <p class="lead text-muted mb-4">
+          Connect with fellow gardeners, share your harvest, and grow together in our vibrant community marketplace.
+        </p>
+        <div class="d-flex gap-3 flex-wrap">
+          <span class="badge fs-6 px-3 py-2" style="background-color: var(--warm-orange); color: white;">
+            <i class="fas fa-leaf me-2"></i>Fresh Produce
+          </span>
+          <span class="badge fs-6 px-3 py-2" style="background-color: var(--sunset-orange); color: white;">
+            <i class="fas fa-seedling me-2"></i>Seed Exchange
+          </span>
+          <span class="badge fs-6 px-3 py-2" style="background-color: var(--peach); color: white;">
+            <i class="fas fa-tools me-2"></i>Garden Tools
+          </span>
+          <span class="badge fs-6 px-3 py-2" style="background-color: var(--warm-orange); color: white;">
+            <i class="fas fa-users me-2"></i>Community
+          </span>
+        </div>
+      </div>
+      <div class="col-lg-4 text-center">
+        <div class="hero-icon">
+          <i class="fas fa-seedling" style="font-size: 8rem; color: var(--mint-green); opacity: 0.8;"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.hero-section {
+  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+  border-radius: 20px;
+  border: 2px solid rgba(127, 176, 105, 0.3);
+  box-shadow: 0 8px 32px rgba(45, 80, 22, 0.15);
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(10px);
+}
+
+.hero-section::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -20%;
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, rgba(127, 176, 105, 0.1) 0%, transparent 70%);
+  border-radius: 50%;
+  animation: float 6s ease-in-out infinite;
+}
+
+.hero-section::after {
+  content: '';
+  position: absolute;
+  bottom: -30%;
+  left: -10%;
+  width: 150px;
+  height: 150px;
+  background: radial-gradient(circle, rgba(255, 140, 66, 0.08) 0%, transparent 70%);
+  border-radius: 50%;
+  animation: float 8s ease-in-out infinite reverse;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-20px) rotate(5deg); }
+}
+
+.hero-icon {
+  animation: bounce 3s ease-in-out infinite;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+.badge {
+  transition: transform 0.3s ease;
+}
+
+.badge:hover {
+  transform: translateY(-2px);
+}
+</style>
+
+<div class="container">
+  <!-- Advanced Search Section -->
+  <div class="card mb-4 plant-decoration">
+    <div class="card-header">
+      <div class="d-flex justify-content-between align-items-center">
+        <h3 class="mb-0">
+          <i class="fas fa-search me-2"></i>Advanced Search
+        </h3>
+        <button class="btn btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#searchCollapse" aria-expanded="false" aria-controls="searchCollapse">
+          <i class="fas fa-chevron-down me-1"></i>Toggle Search
+        </button>
+      </div>
+    </div>
+    <div class="collapse" id="searchCollapse">
+      <div class="card-body">
+        <form method="GET" action="{{url_for('core.index')}}" class="row g-3">
+          <div class="col-md-6">
+            <label for="event_name" class="form-label">
+              <i class="fas fa-calendar-alt me-1"></i>Event Name
+            </label>
+            <input type="text" class="form-control" id="event_name" name="event_name" 
+                   value="{{search_name or ''}}" placeholder="Search by event name...">
+          </div>
+          <div class="col-md-6">
+            <label for="location" class="form-label">
+              <i class="fas fa-map-marker-alt me-1"></i>Location
+            </label>
+            <input type="text" class="form-control" id="location" name="location" 
+                   value="{{search_location or ''}}" placeholder="Search by location...">
+          </div>
+          <div class="col-md-6">
+            <label for="date_from" class="form-label">
+              <i class="fas fa-calendar-day me-1"></i>From Date
+            </label>
+            <input type="date" class="form-control" id="date_from" name="date_from" 
+                   value="{{date_from or ''}}">
+          </div>
+          <div class="col-md-6">
+            <label for="date_to" class="form-label">
+              <i class="fas fa-calendar-day me-1"></i>To Date
+            </label>
+            <input type="date" class="form-control" id="date_to" name="date_to" 
+                   value="{{date_to or ''}}">
+          </div>
+          <div class="col-12">
+            <label for="items_search" class="form-label">
+              <i class="fas fa-shopping-bag me-1"></i>Items Being Brought
+            </label>
+            <input type="text" class="form-control" id="items_search" name="items_search" 
+                   value="{{search_items or ''}}" placeholder="Search by items being brought (e.g., 'tomato seeds', 'garden tools')...">
+          </div>
+          <div class="col-12">
+            <div class="d-flex gap-2">
+              <button type="submit" class="btn btn-primary">
+                <i class="fas fa-search me-1"></i>Search Events
+              </button>
+              <a href="{{url_for('core.index')}}" class="btn btn-outline-secondary">
+                <i class="fas fa-times me-1"></i>Clear Search
+              </a>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Search Results Info -->
+  {% if search_name or search_location or search_items or date_from or date_to %}
+  <div class="alert alert-info mb-4">
+    <i class="fas fa-info-circle me-2"></i>
+    <strong>Search Results:</strong> 
+    Found {{events.total}} event(s) matching your search criteria.
+    <a href="{{url_for('core.index')}}" class="alert-link ms-2">View all events</a>
+  </div>
+  {% endif %}
+  {% for event in events.items %}
+  <div class="card mb-4">
+    <div class="card-header">
+      <h2><a href="{{url_for('posts.event', event_id = event.id)}}" class="text-decoration-none">{{event.event_title}}</a></h2>
+      <h5 class="text-muted">Created by: {% if event.author %}<a href="{{url_for('users.user_events', username = event.author.username)}}">{{event.author.username}}</a>{% else %}Unknown Author{% endif %}</h5>
+    </div>
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-6">
+          <p><strong>Event Date:</strong> {{event.event_date.strftime('%B %d, %Y')}}</p>
+          <p><strong>Event Time:</strong> {{event.event_time.strftime('%I:%M %p')}}</p>
+        </div>
+        <div class="col-md-6">
+          <p><strong>Location:</strong> {{event.location}}</p>
+          <p><strong>Created:</strong> {{event.created_date.strftime('%Y-%m-%d')}}</p>
+        </div>
+      </div>
+      <hr>
+      <p>{{event.event_description[:150]}}{% if event.event_description|length > 150 %}...{% endif %}</p>
+      <a class="btn btn-primary" href="{{url_for('posts.event', event_id = event.id)}}">View Event Details</a>
+    </div>
+  </div>
+  {% endfor %}
+  <nav aria-label="Events Navigation">
+    <ul class="pagination justify-content-center">
+        {% for page in events.iter_pages(left_edge = 1, right_edge = 1, left_current = 1, right_current = 2) %}
+        {% if page %}
+          {% if page == events.page %}
+            <li class="page-item active"><span class="page-link">{{page}}</span></li>
+          {% else %}
+            <li class="page-item">
+              <a class="page-link" href="{{url_for('core.index', page = page, event_name = search_name, location = search_location, items_search = search_items, date_from = date_from, date_to = date_to)}}">{{page}}</a>
+            </li>
+          {% endif %}
+        {% else %}
+          <li class="page-item disabled"><span class="page-link">...</span></li>
+        {% endif %}
+        {% endfor %}
+    </ul>
+  </nav>
+</div>
+
+<style>
+/* Advanced Search Styling */
+.plant-decoration {
+    border: 2px solid #28a745;
+    border-radius: 15px;
+    box-shadow: 0 4px 6px rgba(40, 167, 69, 0.1);
+}
+
+.plant-decoration .card-header {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+    border-radius: 13px 13px 0 0;
+}
+
+.plant-decoration .card-header h3 {
+    color: white;
+    font-weight: 600;
+}
+
+.plant-decoration .card-header .btn {
+    border-color: rgba(255, 255, 255, 0.3);
+    color: white;
+}
+
+.plant-decoration .card-header .btn:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.5);
+    color: white;
+}
+
+.form-label {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 8px;
+}
+
+.form-control {
+    border-radius: 8px;
+    border: 2px solid #e9ecef;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: #28a745;
+    box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    padding: 10px 20px;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #218838, #1ea085);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+}
+
+.btn-outline-secondary {
+    border-radius: 8px;
+    font-weight: 600;
+    padding: 10px 20px;
+    transition: all 0.3s ease;
+}
+
+.btn-outline-secondary:hover {
+    transform: translateY(-1px);
+}
+
+.alert-info {
+    border-left: 4px solid #17a2b8;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #d1ecf1, #bee5eb);
+}
+
+/* Search Results Cards */
+.card {
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    border: 1px solid #e9ecef;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.card-header {
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    border-bottom: 2px solid #28a745;
+    border-radius: 10px 10px 0 0;
+}
+
+.card-header h2 a {
+    color: #28a745;
+    transition: color 0.3s ease;
+}
+
+.card-header h2 a:hover {
+    color: #1e7e34;
+}
+
+/* Pagination Styling */
+.pagination .page-link {
+    border-radius: 8px;
+    margin: 0 2px;
+    border: 2px solid #e9ecef;
+    color: #28a745;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.pagination .page-link:hover {
+    background-color: #28a745;
+    border-color: #28a745;
+    color: white;
+    transform: translateY(-1px);
+}
+
+.pagination .page-item.active .page-link {
+    background-color: #28a745;
+    border-color: #28a745;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .plant-decoration .card-header {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .plant-decoration .card-header .btn {
+        width: 100%;
+    }
+    
+    .d-flex.gap-2 {
+        flex-direction: column;
+    }
+    
+    .d-flex.gap-2 .btn {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+}
+
+/* Animation for search collapse */
+.collapse {
+    transition: all 0.3s ease;
+}
+
+/* Icon styling */
+.fas {
+    color: #28a745;
+}
+
+.form-label .fas {
+    color: #6c757d;
+}
+</style>
+
+{% endblock %}

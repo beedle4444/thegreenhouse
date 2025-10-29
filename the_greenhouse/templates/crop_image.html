@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container">
+    <h1>Crop Your Profile Picture</h1>
+    <p>Select the area you want to use for your profile picture:</p>
+    
+    <div class="row">
+        <div class="col-md-8">
+            <div id="image-container" class="crop-container">
+                <img id="crop-image" src="{{ image_url }}" style="max-width: 100%; height: auto;">
+                <div id="crop-overlay" class="crop-overlay">
+                    <div id="crop-box" class="crop-box"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5>Preview</h5>
+                    <div id="preview-container" style="width: 150px; height: 150px; border-radius: 50%; 
+                         overflow: hidden; border: 3px solid #dee2e6; margin: 0 auto;">
+                        <img id="preview-image" style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                    <br>
+                    <form method="POST" id="crop-form">
+                        <input type="hidden" id="crop-x" name="crop_x">
+                        <input type="hidden" id="crop-y" name="crop_y">
+                        <input type="hidden" id="crop-width" name="crop_width">
+                        <input type="hidden" id="crop-height" name="crop_height">
+                        <button type="submit" class="btn btn-primary">Save Profile Picture</button>
+                        <a href="{{ url_for('users.account') }}" class="btn btn-secondary">Cancel</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const image = document.getElementById('crop-image');
+    const cropBox = document.getElementById('crop-box');
+    const previewImage = document.getElementById('preview-image');
+    const cropForm = document.getElementById('crop-form');
+    
+    let isDragging = false;
+    let startX, startY, startLeft, startTop;
+    
+    // Initialize crop box in center
+    function initCropBox() {
+        const imageRect = image.getBoundingClientRect();
+        const containerRect = document.getElementById('image-container').getBoundingClientRect();
+        
+        const imageWidth = image.offsetWidth;
+        const imageHeight = image.offsetHeight;
+        
+        // Make crop box square and centered
+        const cropSize = Math.min(imageWidth, imageHeight) * 0.6;
+        const left = (imageWidth - cropSize) / 2;
+        const top = (imageHeight - cropSize) / 2;
+        
+        cropBox.style.width = cropSize + 'px';
+        cropBox.style.height = cropSize + 'px';
+        cropBox.style.left = left + 'px';
+        cropBox.style.top = top + 'px';
+        
+        updatePreview();
+    }
+    
+    // Update preview image
+    function updatePreview() {
+        const imageRect = image.getBoundingClientRect();
+        const cropRect = cropBox.getBoundingClientRect();
+        
+        const scaleX = image.naturalWidth / image.offsetWidth;
+        const scaleY = image.naturalHeight / image.offsetHeight;
+        
+        const x = (cropRect.left - imageRect.left) * scaleX;
+        const y = (cropRect.top - imageRect.top) * scaleY;
+        const width = cropRect.width * scaleX;
+        const height = cropRect.height * scaleY;
+        
+        // Create canvas for cropping
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = 300;
+        canvas.height = 300;
+        
+        ctx.drawImage(image, x, y, width, height, 0, 0, 300, 300);
+        
+        previewImage.src = canvas.toDataURL();
+        
+        // Update hidden form fields
+        document.getElementById('crop-x').value = Math.round(x);
+        document.getElementById('crop-y').value = Math.round(y);
+        document.getElementById('crop-width').value = Math.round(width);
+        document.getElementById('crop-height').value = Math.round(height);
+    }
+    
+    // Mouse events for dragging
+    cropBox.addEventListener('mousedown', function(e) {
+        isDragging = true;
+        startX = e.clientX;
+        startY = e.clientY;
+        startLeft = parseInt(cropBox.style.left);
+        startTop = parseInt(cropBox.style.top);
+        e.preventDefault();
+    });
+    
+    document.addEventListener('mousemove', function(e) {
+        if (!isDragging) return;
+        
+        const deltaX = e.clientX - startX;
+        const deltaY = e.clientY - startY;
+        
+        const newLeft = startLeft + deltaX;
+        const newTop = startTop + deltaY;
+        
+        // Constrain to image bounds
+        const imageRect = image.getBoundingClientRect();
+        const containerRect = document.getElementById('image-container').getBoundingClientRect();
+        
+        const maxLeft = image.offsetWidth - cropBox.offsetWidth;
+        const maxTop = image.offsetHeight - cropBox.offsetHeight;
+        
+        cropBox.style.left = Math.max(0, Math.min(newLeft, maxLeft)) + 'px';
+        cropBox.style.top = Math.max(0, Math.min(newTop, maxTop)) + 'px';
+        
+        updatePreview();
+    });
+    
+    document.addEventListener('mouseup', function() {
+        isDragging = false;
+    });
+    
+    // Initialize when image loads
+    image.addEventListener('load', initCropBox);
+    if (image.complete) {
+        initCropBox();
+    }
+});
+</script>
+{% endblock %}

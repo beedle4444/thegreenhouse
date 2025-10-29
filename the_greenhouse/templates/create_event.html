@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container">
+    <div class="form-hero-section mb-4">
+        <div class="text-center py-4">
+            <h1 class="display-5 fw-bold text-primary mb-2">
+                <i class="fas fa-calendar-plus me-3"></i>{% if event %}Update Event{% else %}Create Event{% endif %}
+            </h1>
+            <p class="lead text-muted">
+                {% if event %}Make changes to your event details{% else %}Host your own marketplace and connect with fellow gardeners{% endif %}
+            </p>
+        </div>
+    </div>
+    
+    <div class="form-card">
+        <form method="POST">
+            {{form.hidden_tag()}}
+            <div class="mb-4">
+                {{form.event_title.label(class="form-label fw-semibold")}}
+                {{form.event_title(class="form-control form-control-lg")}}
+            </div>
+            <div class="mb-4">
+                {{form.event_description.label(class="form-label fw-semibold")}}
+                {{form.event_description(class="form-control", rows="4")}}
+            </div>
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    {{form.event_date.label(class="form-label fw-semibold")}}
+                    {{form.event_date(class="form-control")}}
+                </div>
+                <div class="col-md-6">
+                    {{form.event_time.label(class="form-label fw-semibold")}}
+                    {{form.event_time(class="form-control")}}
+                </div>
+            </div>
+            <div class="mb-4">
+                {{form.location.label(class="form-label fw-semibold")}}
+                {{form.location(class="form-control")}}
+            </div>
+            <div class="mb-4">
+                {{form.purpose.label(class="form-label fw-semibold")}}
+                {{form.purpose(class="form-select", id="purposeSelect")}}
+            </div>
+            <div class="mb-4" id="itemsSection" style="display: none;">
+                {{form.items_bringing.label(class="form-label fw-semibold")}}
+                {{form.items_bringing(class="form-control", rows="4", placeholder="List the items you plan to bring, one per line...")}}
+                <div class="form-text">
+                    <i class="fas fa-info-circle me-1"></i>Please list each item on a separate line
+                </div>
+            </div>
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                <a href="{{url_for('core.index')}}" class="btn btn-outline-secondary me-md-2">
+                    <i class="fas fa-times me-2"></i>Cancel
+                </a>
+                {{form.submit(class="btn btn-success btn-lg", value="Update Event" if event else "Create Event")}}
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+.form-hero-section {
+    background: linear-gradient(135deg, 
+        rgba(127, 176, 105, 0.1) 0%, 
+        rgba(255, 140, 66, 0.05) 50%, 
+        rgba(155, 181, 160, 0.1) 100%);
+    border-radius: 15px;
+    border: 1px solid rgba(127, 176, 105, 0.2);
+    box-shadow: 0 4px 20px rgba(45, 80, 22, 0.1);
+}
+
+.form-card {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 15px;
+    padding: 2.5rem;
+    box-shadow: 0 8px 32px rgba(45, 80, 22, 0.1);
+    border: 1px solid rgba(127, 176, 105, 0.2);
+    backdrop-filter: blur(10px);
+}
+
+.form-control, .form-select {
+    border: 2px solid rgba(127, 176, 105, 0.2);
+    border-radius: 10px;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--mint-green);
+    box-shadow: 0 0 0 0.2rem rgba(127, 176, 105, 0.25);
+}
+
+.form-label {
+    color: var(--primary-green);
+    margin-bottom: 0.5rem;
+}
+
+.btn {
+    transition: transform 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+}
+</style>
+
+<script>
+document.getElementById('purposeSelect').addEventListener('change', function() {
+    const itemsSection = document.getElementById('itemsSection');
+    if (this.value === 'Sell' || this.value === 'Both') {
+        itemsSection.style.display = 'block';
+        document.querySelector('textarea[name="items_bringing"]').required = true;
+    } else {
+        itemsSection.style.display = 'none';
+        document.querySelector('textarea[name="items_bringing"]').required = false;
+    }
+});
+</script>
+{% endblock %}

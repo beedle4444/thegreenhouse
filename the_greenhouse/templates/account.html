@@ -1,0 +1,393 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container">
+    <div class="row">
+        <!-- Profile Section -->
+        <div class="col-md-4">
+            <div class="profile-card">
+                <div class="profile-header">
+                    <h1 class="profile-title">
+                        <i class="fas fa-user-circle me-2"></i>{{current_user.username}}'s Profile
+                    </h1>
+                </div>
+                <div class="profile-body text-center">
+                    <div class="profile-image-container">
+                        <img class="profile-pic-large" src='{{url_for("static", filename = 
+                        "profile_pics/" + current_user.profile_image)}}' 
+                        alt="{{current_user.username}}'s profile picture"
+                        onerror="handleImageError(this)">
+                    </div>
+
+                    <form method = "POST" class = "profile-form" enctype="multipart/form-data" action="">
+                        {{form.hidden_tag()}}
+                        <div class = 'form-group mb-3'>
+                            {{form.email.label(class="form-label fw-semibold")}}
+                            {{form.email(class="form-control")}}
+                        </div>
+                        <div class = 'form-group mb-3'>
+                            {{form.username.label(class="form-label fw-semibold")}}
+                            {{form.username(class="form-control")}}
+                        </div>
+                        <div class = 'form-group mb-3'>
+                            {{form.picture.label(class="form-label fw-semibold")}}
+                            {{form.picture(class="btn btn-outline-secondary")}}
+                        </div>
+                        <div class = 'form-group'>
+                            {{form.submit(class="btn btn-success btn-lg")}}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Calendar Section -->
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3>My Events Calendar</h3>
+                    <div class="btn-group" role="group">
+                        <a href="{{url_for('users.account', month=prev_month, year=prev_year)}}" class="btn btn-outline-primary">← Previous</a>
+                        <span class="btn btn-primary">{{month_name}} {{year}}</span>
+                        <a href="{{url_for('users.account', month=next_month, year=next_year)}}" class="btn btn-outline-primary">Next →</a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="calendar-container">
+                        <div class="calendar-grid">
+                            <!-- Calendar Header -->
+                            <div class="calendar-header">
+                                <div class="calendar-day-header">Mon</div>
+                                <div class="calendar-day-header">Tue</div>
+                                <div class="calendar-day-header">Wed</div>
+                                <div class="calendar-day-header">Thu</div>
+                                <div class="calendar-day-header">Fri</div>
+                                <div class="calendar-day-header">Sat</div>
+                                <div class="calendar-day-header">Sun</div>
+                            </div>
+                            
+                            <!-- Calendar Body -->
+                            <div class="calendar-body">
+                                {% set days_in_month = last_day.day %}
+                                {% set start_day = first_weekday %}
+                                
+                                <!-- Previous month's trailing days -->
+                                {% if start_day > 0 %}
+                                    {% for day in range(start_day) %}
+                                        <div class="calendar-day other-month">
+                                            <!-- Previous month days will be calculated by JavaScript or we can skip them for simplicity -->
+                                        </div>
+                                    {% endfor %}
+                                {% endif %}
+                                
+                                <!-- Current month's days -->
+                                {% for current_date in month_dates %}
+                                    {% set has_events = current_date in events_by_date %}
+                                    <div class="calendar-day {% if has_events %}has-events{% endif %} {% if current_date == today %}today{% endif %}">
+                                        <div class="day-number">{{current_date.day}}</div>
+                                        {% if has_events %}
+                                            <div class="events-indicator">
+                                                {% for event in events_by_date[current_date] %}
+                                                    <div class="event-dot" title="{{event.event_title}} at {{event.event_time.strftime('%I:%M %p')}}"></div>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                {% endfor %}
+                                
+                                <!-- Next month's leading days -->
+                                {% set remaining_days = 42 - (start_day + days_in_month) %}
+                                {% for day in range(1, remaining_days + 1) %}
+                                    <div class="calendar-day other-month">
+                                        {{day}}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        
+                        <!-- Events List for the Month -->
+                        {% if events_by_date %}
+                            <div class="mt-4">
+                                <h5>Events This Month:</h5>
+                                <div class="events-list">
+                                    {% for event_date, events in events_by_date.items() %}
+                                        {% for event in events %}
+                                            <div class="event-item">
+                                                <div class="event-date">{{event_date.strftime('%B %d')}}</div>
+                                                <div class="event-details">
+                                                    <strong><a href="{{url_for('posts.event', event_id=event.id)}}">{{event.event_title}}</a></strong>
+                                                    <br>
+                                                    <small class="text-muted">{{event.event_time.strftime('%I:%M %p')}} at {{event.location}}</small>
+                                                </div>
+                                            </div>
+                                        {% endfor %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="mt-4 text-center text-muted">
+                                <p>No events scheduled for {{month_name}} {{year}}</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Profile Section Styling */
+.profile-card {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 15px;
+    box-shadow: 0 8px 32px rgba(45, 80, 22, 0.1);
+    border: 1px solid rgba(127, 176, 105, 0.2);
+    backdrop-filter: blur(10px);
+    overflow: hidden;
+}
+
+.profile-header {
+    background: linear-gradient(135deg, 
+        rgba(127, 176, 105, 0.1) 0%, 
+        rgba(255, 140, 66, 0.05) 50%, 
+        rgba(155, 181, 160, 0.1) 100%);
+    padding: 1.5rem;
+    border-bottom: 1px solid rgba(127, 176, 105, 0.2);
+}
+
+.profile-title {
+    color: var(--primary-green);
+    font-size: 1.5rem;
+    margin: 0;
+    font-weight: 600;
+}
+
+.profile-body {
+    padding: 2rem;
+}
+
+.profile-image-container {
+    margin-bottom: 2rem;
+    position: relative;
+}
+
+.profile-pic-large {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid rgba(127, 176, 105, 0.3);
+    box-shadow: 0 4px 20px rgba(45, 80, 22, 0.15);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.profile-pic-large:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 25px rgba(45, 80, 22, 0.2);
+}
+
+.profile-form {
+    text-align: left;
+}
+
+.form-control {
+    border: 2px solid rgba(127, 176, 105, 0.2);
+    border-radius: 10px;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: var(--mint-green);
+    box-shadow: 0 0 0 0.2rem rgba(127, 176, 105, 0.25);
+}
+
+.form-label {
+    color: var(--primary-green);
+    margin-bottom: 0.5rem;
+}
+
+.btn {
+    transition: transform 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+}
+
+.calendar-container {
+    max-width: 100%;
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1px;
+    background-color: #dee2e6;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.calendar-header {
+    display: contents;
+}
+
+.calendar-day-header {
+    background-color: #f8f9fa;
+    padding: 10px;
+    text-align: center;
+    font-weight: bold;
+    color: #495057;
+    border-bottom: 2px solid #dee2e6;
+}
+
+.calendar-body {
+    display: contents;
+}
+
+.calendar-day {
+    background-color: white;
+    min-height: 80px;
+    padding: 8px;
+    position: relative;
+    border-right: 1px solid #dee2e6;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.calendar-day.other-month {
+    background-color: #f8f9fa;
+    color: #6c757d;
+}
+
+.calendar-day.today {
+    background-color: #e3f2fd;
+    border: 2px solid #2196f3;
+}
+
+.calendar-day.has-events {
+    background-color: #fff3cd;
+    border-left: 4px solid #ffc107;
+}
+
+.day-number {
+    font-weight: bold;
+    margin-bottom: 4px;
+}
+
+.events-indicator {
+    position: absolute;
+    bottom: 4px;
+    left: 4px;
+    right: 4px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+}
+
+.event-dot {
+    width: 8px;
+    height: 8px;
+    background-color: #28a745;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.events-list {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.event-item {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    background-color: #f8f9fa;
+}
+
+.event-date {
+    min-width: 80px;
+    font-weight: bold;
+    color: #495057;
+    margin-right: 15px;
+}
+
+.event-details {
+    flex: 1;
+}
+
+@media (max-width: 768px) {
+    .calendar-day {
+        min-height: 60px;
+        padding: 4px;
+    }
+    
+    .event-dot {
+        width: 6px;
+        height: 6px;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add hover effects to calendar days with events
+    const calendarDays = document.querySelectorAll('.calendar-day.has-events');
+    
+    calendarDays.forEach(day => {
+        day.addEventListener('mouseenter', function() {
+            this.style.transform = 'scale(1.05)';
+            this.style.transition = 'transform 0.2s ease';
+        });
+        
+        day.addEventListener('mouseleave', function() {
+            this.style.transform = 'scale(1)';
+        });
+    });
+    
+    // Add click functionality to event dots for more details
+    const eventDots = document.querySelectorAll('.event-dot');
+    
+    eventDots.forEach(dot => {
+        dot.addEventListener('click', function() {
+            const tooltip = this.getAttribute('title');
+            if (tooltip) {
+                alert(tooltip);
+            }
+        });
+        
+        dot.style.cursor = 'pointer';
+    });
+    
+    // Smooth scrolling for events list
+    const eventsList = document.querySelector('.events-list');
+    if (eventsList) {
+        eventsList.style.scrollBehavior = 'smooth';
+    }
+    
+    // Add keyboard navigation for month navigation
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'ArrowLeft') {
+            const prevButton = document.querySelector('a[href*="month={{prev_month}}"]');
+            if (prevButton) {
+                window.location.href = prevButton.href;
+            }
+        } else if (e.key === 'ArrowRight') {
+            const nextButton = document.querySelector('a[href*="month={{next_month}}"]');
+            if (nextButton) {
+                window.location.href = nextButton.href;
+            }
+        }
+    });
+    
+    // Highlight today's date more prominently
+    const todayElement = document.querySelector('.calendar-day.today');
+    if (todayElement) {
+        todayElement.style.boxShadow = '0 0 10px rgba(33, 150, 243, 0.5)';
+    }
+});
+</script>
+
+{% endblock %}

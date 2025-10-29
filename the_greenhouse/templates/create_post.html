@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container">
+    <h1>{% if event %}Update Event{% else %}Create Event{% endif %}</h1>
+    <form method="POST">
+        {{form.hidden_tag()}}
+        <div class="mb-3">
+            {{form.event_title.label(class="form-label")}}
+            {{form.event_title(class="form-control")}}
+        </div>
+        <div class="mb-3">
+            {{form.event_description.label(class="form-label")}}
+            {{form.event_description(class="form-control", rows="4")}}
+        </div>
+        <div class="row mb-3">
+            <div class="col-md-6">
+                {{form.event_date.label(class="form-label")}}
+                {{form.event_date(class="form-control")}}
+            </div>
+            <div class="col-md-6">
+                {{form.event_time.label(class="form-label")}}
+                {{form.event_time(class="form-control")}}
+            </div>
+        </div>
+        <div class="mb-3">
+            {{form.location.label(class="form-label")}}
+            {{form.location(class="form-control")}}
+        </div>
+        {{form.submit(class="btn btn-primary", value="Update Event" if event else "Create Event")}}
+    </form>
+</div>
+{% endblock %}

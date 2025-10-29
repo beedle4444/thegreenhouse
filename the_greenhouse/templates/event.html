@@ -1,0 +1,293 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container">
+    {% if event %}
+    <div class="card plant-decoration">
+        <div class="card-header">
+            <h1 class="card-title">
+                <i class="fas fa-calendar-alt me-2"></i>{{event.event_title}}
+            </h1>
+            <h5 class="card-subtitle text-muted">
+                <i class="fas fa-user me-1"></i>Created by: {% if event.author %}{{event.author.username}}{% else %}Unknown Author{% endif %}
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <h6><i class="fas fa-calendar-day text-primary me-2"></i><strong>Event Date:</strong> {{event.event_date.strftime('%B %d, %Y')}}</h6>
+                    </div>
+                    <div class="mb-3">
+                        <h6><i class="fas fa-clock text-warning me-2"></i><strong>Event Time:</strong> {{event.event_time.strftime('%I:%M %p')}}</h6>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        {% set location_words = event.location.split(' ') %}
+                        {% set google_maps_url = "https://www.google.com/maps/search/" + location_words|join('+') %}
+                        <h6><i class="fas fa-map-marker-alt text-danger me-2"></i><strong>Location:</strong> 
+                            <a href="{{google_maps_url}}" target="_blank" class="text-decoration-none">
+                                {{event.location}} <i class="fas fa-external-link-alt ms-1"></i>
+                            </a>
+                        </h6>
+                    </div>
+                    <div class="mb-3">
+                        <h6><i class="fas fa-calendar-plus text-success me-2"></i><strong>Created:</strong> {{event.created_date.strftime('%Y-%m-%d')}}</h6>
+                    </div>
+                </div>
+            </div>
+            <hr class="my-4">
+            <h5><i class="fas fa-leaf me-2"></i>Event Description:</h5>
+            <p class="card-text fs-5">{{event.event_description}}</p>
+        </div>
+        <div class="card-footer">
+            {% if current_user.is_authenticated %}
+                {% if user_attending %}
+                    <div class="alert alert-info">
+                        <h6 class="alert-heading">
+                            <i class="fas fa-check-circle me-2"></i>You're attending this event!
+                        </h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p class="mb-2"><i class="fas fa-thumbs-up me-2"></i><strong>Likelihood:</strong> 
+                                    <span class="badge bg-success">{{user_attending.attendance_likelihood}}</span>
+                                </p>
+                            </div>
+                            <div class="col-md-6">
+                                <p class="mb-2"><i class="fas fa-bullseye me-2"></i><strong>Purpose:</strong> {{user_attending.purpose}}</p>
+                            </div>
+                        </div>
+                        {% if user_attending.items_bringing %}
+                            <hr>
+                            <h6><i class="fas fa-shopping-bag me-2"></i><strong>Items you're bringing:</strong></h6>
+                            {% set items_bringing_text = user_attending.items_bringing.replace('\n', ',') %}
+                            {% set items_bringing_list = items_bringing_text.split(',') %}
+                            <ul class="mb-0">
+                                {% for item in items_bringing_list %}
+                                    {% if item.strip() %}
+                                        <li><i class="fas fa-seedling me-2 text-success"></i>{{item.strip()}}</li>
+                                    {% endif %}
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                        <hr>
+                        <div class="d-flex gap-2">
+                            {% if user_attending.user_id != event.user_id %}
+                                <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#unattendModal">
+                                    <i class="fas fa-times-circle me-2"></i>Unattend Event
+                                </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% elif event.author != current_user and event.event_date >= now %}
+                    <a href="{{url_for('posts.join_event', event_id = event.id)}}" class="btn btn-success btn-lg">
+                        <i class="fas fa-plus-circle me-2"></i>Join Event
+                    </a>
+                {% elif event.author != current_user and event.event_date < now %}
+                    <div class="alert alert-danger"></div>
+                    <h6 class="alert-heading">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Event has already happened!
+                    </h6>
+                    <p class="mb-0">You cannot join this event as it has already happened.</p>
+                    </div>
+                {% else %}
+                    <div class="alert alert-primary">
+                        <h6 class="alert-heading">
+                            <i class="fas fa-crown me-2"></i>You created this event!
+                        </h6>
+                        <p class="mb-0">You are automatically attending as the event creator.</p>
+                    </div>
+                {% endif %}
+            {% else %}
+                <a href="{{url_for('users.login')}}" class="btn btn-success btn-lg">
+                    <i class="fas fa-sign-in-alt me-2"></i>Login to Join Event
+                </a>
+            {% endif %}
+            
+            {% if event.author and event.author == current_user %}
+                <hr class="my-4">
+                <div class="d-flex gap-3">
+                    <a href="{{url_for('posts.update', event_id = event.id)}}" class="btn btn-primary">
+                        <i class="fas fa-edit me-2"></i>Update Event
+                    </a>
+                    <a href="{{url_for('posts.delete', event_id = event.id)}}" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this event? This action cannot be undone.');">
+                        <i class="fas fa-trash-alt me-2"></i>Delete Event
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Attendees Section -->
+    {% if attendees %}
+    <div class="card mt-4 plant-decoration">
+        <div class="card-header">
+            <h3><i class="fas fa-users me-2"></i>Event Attendees ({{attendees|length}})</h3>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                {% for attendee in attendees %}
+                <div class="col-md-6 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h6 class="card-title d-flex align-items-center">
+                                <img src="{{url_for('static', filename='profile_pics/' + attendee.user.profile_image)}}" 
+                                     class="profile-pic-small me-3" alt="{{attendee.user.username}}'s profile">
+                                <div class="d-flex align-items-center">
+                                    <a href="{{url_for('users.user_events', username=attendee.user.username)}}" class="text-decoration-none me-2">
+                                        <i class="fas fa-user me-1"></i>{{attendee.user.username}}
+                                    </a>
+                                    {% if attendee.user_id == event.user_id %}
+                                        <span class="badge" style="background: linear-gradient(135deg, #2d5016 0%, #4a7c59 100%); color: white; padding: 4px 8px; margin-left: 8px; font-size: 0.75em; font-weight: 500; border-radius: 12px; box-shadow: 0 2px 4px rgba(45, 80, 22, 0.2);">
+                                            <i class="fas fa-crown me-1"></i>Creator
+                                        </span>
+                                    {% endif %}
+                                </div>
+                            </h6>
+                            <div class="row">
+                                <div class="col-6">
+                                    <p class="card-text mb-2">
+                                        <i class="fas fa-thumbs-up me-1"></i><strong>Likelihood:</strong><br>
+                                        <span class="badge {% if attendee.attendance_likelihood == 'Definitely' %}bg-success{% elif attendee.attendance_likelihood == 'Possibly' %}bg-warning{% else %}bg-secondary{% endif %}">
+                                            {{attendee.attendance_likelihood}}
+                                        </span>
+                                    </p>
+                                </div>
+                                <div class="col-6">
+                                    <p class="card-text mb-2">
+                                        <i class="fas fa-bullseye me-1"></i><strong>Purpose:</strong><br>
+                                        <small>{{attendee.purpose}}</small>
+                                    </p>
+                                </div>
+                            </div>
+                            {% if attendee.items_bringing %}
+                                <hr>
+                                <p class="card-text mb-2">
+                                    <i class="fas fa-shopping-bag me-1"></i><strong>Items bringing:</strong>
+                                </p>
+                                {% set attendee_items_text = attendee.items_bringing.replace('\n', ',') %}
+                                {% set attendee_items_list = attendee_items_text.split(',') %}
+                                <ul class="mb-0">
+                                    {% for item in attendee_items_list %}
+                                        {% if item.strip() %}
+                                            <li><i class="fas fa-seedling me-2 text-success"></i><small>{{item.strip()}}</small></li>
+                                        {% endif %}
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="card mt-4">
+        <div class="card-body text-center">
+            <i class="fas fa-users text-muted mb-3" style="font-size: 3rem;"></i>
+            <h5>No attendees yet</h5>
+            <p class="text-muted">Be the first to join this event!</p>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Event Items Section -->
+    {% if event_items %}
+    <div class="card mt-4 plant-decoration">
+        <div class="card-header">
+            <h3><i class="fas fa-shopping-bag me-2"></i>Items Being Brought to This Event ({{event_items|length}})</h3>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                {% for item in event_items %}
+                <div class="col-md-6 col-lg-4 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h6 class="card-title d-flex align-items-center">
+                                <img src="{{url_for('static', filename='profile_pics/' + item.user.profile_image)}}" 
+                                     class="profile-pic-small me-3" alt="{{item.user.username}}'s profile"
+                                     onerror="handleImageError(this)">
+                                <a href="{{url_for('users.user_events', username=item.user.username)}}" class="text-decoration-none">
+                                    <i class="fas fa-user me-1"></i>{{item.user.username}}
+                                </a>
+                            </h6>
+                            <div class="item-details">
+                                <h5 class="item-name text-primary mb-2">
+                                    <i class="fas fa-seedling me-2"></i>{{item.item_name}}
+                                </h5>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="card mt-4">
+        <div class="card-body text-center">
+            <i class="fas fa-shopping-bag text-muted mb-3" style="font-size: 3rem;"></i>
+            <h5>No items being brought yet</h5>
+            <p class="text-muted">Join the event and let others know what you're bringing!</p>
+        </div>
+    </div>
+    {% endif %}
+    
+    {% else %}
+    <h1>Event Not Found</h1>
+    <p>The event you're looking for doesn't exist.</p>
+    {% endif %}
+</div>
+
+<!-- Unattend Confirmation Modal -->
+{% if user_attending %}
+<div class="modal fade" id="unattendModal" tabindex="-1" aria-labelledby="unattendModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="unattendModalLabel">
+                    <i class="fas fa-exclamation-triangle text-warning me-2"></i>Confirm Unattend
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to unattend <strong>{{event.event_title}}</strong>?</p>
+                <div class="alert alert-warning">
+                    <strong>You will be able to re-attend the event later.</strong>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>Cancel
+                </button>
+                <form method="POST" action="{{url_for('posts.unattend_event', event_id=event.id)}}" class="d-inline">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-times-circle me-2"></i>Unattend Event
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<style>
+.item-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.profile-pic-small {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.item-details {
+    margin-top: 10px;
+}
+</style>
+
+{% endblock %}

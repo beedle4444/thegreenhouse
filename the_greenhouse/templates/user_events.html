@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container align-self-center">
+    <h1>{{user.username}}'s Greenhouse page</h1>
+    <img class="profile-pic align-self-center" src='{{url_for("static", filename = 
+    "profile_pics/" + user.profile_image)}}' 
+    alt="{{user.username}}'s profile picture"
+    onerror="handleImageError(this)">
+    <h2>{{user.username}}'s Events</h2>
+    {% if events.items %}
+    {% for event in events.items %}
+    <div class="card mb-4">
+      <div class="card-header">
+        <h2><a href="{{url_for('posts.event', event_id = event.id)}}" class="text-decoration-none">{{event.event_title}}</a></h2>
+        <h5 class="text-muted">Created by: {% if event.author %}<a href="{{url_for('users.user_events', username = event.author.username)}}">{{event.author.username}}</a>{% else %}Unknown Author{% endif %}</h5>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-6">
+            <p><strong>Event Date:</strong> {{event.event_date.strftime('%B %d, %Y')}}</p>
+            <p><strong>Event Time:</strong> {{event.event_time.strftime('%I:%M %p')}}</p>
+          </div>
+          <div class="col-md-6">
+            <p><strong>Location:</strong> {{event.location}}</p>
+            <p><strong>Created:</strong> {{event.created_date.strftime('%Y-%m-%d')}}</p>
+          </div>
+        </div>
+        <hr>
+        <p>{{event.event_description[:150]}}{% if event.event_description|length > 150 %}...{% endif %}</p>
+        <a class="btn btn-primary" href="{{url_for('posts.event', event_id = event.id)}}">View Event Details</a>
+      </div>
+    </div>
+    {% endfor %}
+</div>
+<nav aria-label="Events Navigation">
+    <ul class="pagination justify-content-center">
+        {% for page in events.iter_pages(left_edge = 1, right_edge = 1, left_current = 1, right_current = 2) %}
+        {% if page %}
+          {% if page == events.page %}
+            <li class="page-item active"><span class="page-link">{{page}}</span></li>
+          {% else %}
+            <li class="page-item"><a class="page-link" href="{{url_for('users.user_events', username = user.username, page = page)}}">{{page}}</a></li>
+          {% endif %}
+        {% else %}
+          <li class="page-item disabled"><span class="page-link">...</span></li>
+        {% endif %}
+        {% endfor %}
+        {% else %}
+          <li class="page-item disabled"><span class="page-link">This user hasn't created any events yet</span></li>
+        {% endif %}
+    </ul>
+  </nav>
+{% endblock %}

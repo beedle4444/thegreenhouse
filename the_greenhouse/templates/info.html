@@ -1,0 +1,206 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<!-- Hero Section -->
+<div class="info-hero-section mb-5">
+  <div class="container-fluid py-5">
+    <div class="row align-items-center">
+      <div class="col-lg-8">
+        <h1 class="display-4 fw-bold text-primary mb-3">
+          <i class="fas fa-info-circle me-3"></i>About The Greenhouse
+        </h1>
+        <p class="lead text-muted mb-4">
+          Connect with fellow gardeners and share fresh, local produce in our community marketplace.
+        </p>
+      </div>
+      <div class="col-lg-4 text-center">
+        <div class="info-hero-icon">
+          <i class="fas fa-seedling" style="font-size: 8rem; color: var(--mint-green); opacity: 0.8;"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Info Cards Section -->
+<div class="container">
+  <div class="info-card mb-5">
+    <div class="row align-items-center">
+      <div class="col-md-8">
+        <div class="info-content">
+          <h2 class="display-6 fw-bold text-primary mb-3">
+            <i class="fas fa-question-circle me-2"></i>What is The Greenhouse?
+          </h2>
+          <p class="fs-5 text-muted mb-4">
+            The Greenhouse is a platform for connecting with other gardeners and sharing your own fruits and vegetables with others! You can also get some fresh produce from other gardeners, or just connect with others who are interested in gardening IN REAL LIFE! Our mission is to help our community become more self-sufficient and connected with each other through the means of something simple: gardening!
+          </p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="info-image-container">
+          <img src="{{url_for('static', filename='website/foodpile.jpg')}}" alt="Fresh produce" class="info-image">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="info-card mb-5">
+    <div class="row align-items-center">
+      <div class="col-md-4">
+        <div class="info-image-container">
+          <img src="{{url_for('static', filename='website/womanlookingatphone.jpg')}}" alt="Using The Greenhouse" class="info-image">
+        </div>
+      </div>
+      <div class="col-md-8">
+        <div class="info-content">
+          <h2 class="display-6 fw-bold text-primary mb-3">
+            <i class="fas fa-cogs me-2"></i>How does The Greenhouse work?
+          </h2>
+          <p class="fs-5 text-muted mb-4">
+            On The Greenhouse, you can create an account and host a marketplace with others! Just click "Create Event" to host your own marketplace, or browse events and join them to get some fresh produce from other gardeners! You can either choose to buy or sell items, or both! When you join an event, you can let the host know the likelihood that you'll be attending, and what you'll be bringing if you choose to sell!
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="info-card mb-5">
+    <div class="row align-items-center">
+      <div class="col-md-8">
+        <div class="info-content">
+          <h2 class="display-6 fw-bold text-primary mb-3">
+            <i class="fas fa-user-friends me-2"></i>Who can use The Greenhouse?
+          </h2>
+          <p class="fs-5 text-muted mb-4">
+            The Greenhouse is a community for anyone who is interested in gardening, wants to get some fresh produce from other gardeners, or is just looking for a place to connect with others! It's completely free to join and use, and anyone can join!
+          </p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="info-image-container">
+          <img src="{{url_for('static', filename='website/peopleingarden.jpg')}}" alt="Community gardening" class="info-image">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="info-card mb-5">
+    <div class="row align-items-center">
+      <div class="col-md-4">
+        <div class="info-image-container">
+          <img src="{{url_for('static', filename='website/personlookingatcomputer.jpg')}}" alt="Getting started" class="info-image">
+        </div>
+      </div>
+      <div class="col-md-8">
+        <div class="info-content">
+          <h2 class="display-6 fw-bold text-primary mb-3">
+            <i class="fas fa-rocket me-2"></i>How can I use The Greenhouse?
+          </h2>
+          <p class="fs-5 text-muted mb-4">
+            The first step is to create an account! Once you've created an account, you can start hosting events and browsing events to join! You can also view your account page to see your events and event attendance, and to update your profile information. Signing up is completely free, so there's no reason not to try it out!
+          </p>
+          <a href="{{url_for('users.register')}}" class="btn btn-success btn-lg">
+            <i class="fas fa-user-plus me-2"></i>Create Account
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.info-hero-section {
+  background: linear-gradient(135deg, 
+    rgba(127, 176, 105, 0.15) 0%, 
+    rgba(255, 140, 66, 0.08) 50%, 
+    rgba(155, 181, 160, 0.15) 100%);
+  border-radius: 20px;
+  border: 2px solid rgba(127, 176, 105, 0.3);
+  box-shadow: 0 8px 32px rgba(45, 80, 22, 0.15);
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(10px);
+}
+
+.info-hero-section::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -20%;
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, rgba(127, 176, 105, 0.1) 0%, transparent 70%);
+  border-radius: 50%;
+  animation: float 6s ease-in-out infinite;
+}
+
+.info-hero-section::after {
+  content: '';
+  position: absolute;
+  bottom: -30%;
+  left: -10%;
+  width: 150px;
+  height: 150px;
+  background: radial-gradient(circle, rgba(255, 140, 66, 0.08) 0%, transparent 70%);
+  border-radius: 50%;
+  animation: float 8s ease-in-out infinite reverse;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-20px) rotate(5deg); }
+}
+
+.info-hero-icon {
+  animation: bounce 3s ease-in-out infinite;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+.info-card {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 20px;
+  padding: 3rem;
+  box-shadow: 0 8px 32px rgba(45, 80, 22, 0.1);
+  border: 1px solid rgba(127, 176, 105, 0.2);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.info-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 40px rgba(45, 80, 22, 0.15);
+}
+
+.info-image-container {
+  position: relative;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+.info-image {
+  width: 100%;
+  height: 300px;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.info-image-container:hover .info-image {
+  transform: scale(1.05);
+}
+
+.btn {
+  transition: transform 0.3s ease;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+}
+</style>
+
+{% endblock %}
+
